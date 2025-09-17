@@ -7,6 +7,7 @@ import (
 	"os"
 	"encoding/json"
 	"log"
+	"time"
 )
 
 type Exit struct {
@@ -83,7 +84,7 @@ type SpeedInformation struct {
 	FreeFlowSpeed float64 `json:"freeFlowSpeed"`
 }
 
-func fetchAPIBody() {
+func fetchAPIBody(w http.ResponseWriter) {
 	for _, exit := range exits{
 		for i, exitCoordinates := range exit.ExitPoints{
 			resp, err := http.Get(fmt.Sprintf("https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/10/json?point=%s%%2C%s&unit=KMPH&openLr=false&key=%s", exitCoordinates.Lat, exitCoordinates.Long, os.Getenv("TOMTOM_API_KEY")))
@@ -118,7 +119,7 @@ func fetchAPIBody() {
 				congestionLevel = "No Congestion"
 			}
 
-			fmt.Printf("401 and %s %s: Current Speed: %f, Free Flow Speed: %f --> %s\n", exit.Name, exitOrder[i], apiResponse.SpeedInformation.CurrentSpeed, apiResponse.SpeedInformation.FreeFlowSpeed, congestionLevel)
+			fmt.Fprintf(w,"401 and %s %s: Current Speed: %f, Free Flow Speed: %f --> %s\n", exit.Name, exitOrder[i], apiResponse.SpeedInformation.CurrentSpeed, apiResponse.SpeedInformation.FreeFlowSpeed, congestionLevel)
 		}
 	}
 
@@ -137,7 +138,14 @@ func fetchAPIBody() {
 // }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Render is working!")
+		ticket := time.NewTicker(5 * time.Second)
+		defer ticket.Stop()
+		fetchAPIBody(w)
+
+		for t := range ticket.C {
+			fmt.Fprintf(w, "Ticker ticked at %v\n", t)
+			fetchAPIBody(w)
+		}
 }
 
 func main() {
