@@ -1,3 +1,3 @@
 module toronto_congestion_alert
 
-go 1.25.1
+go 1.25
