@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"io"
-	"os"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -100,7 +100,6 @@ func fetchAPIBody(w http.ResponseWriter) {
 				fmt.Printf("Error reading response body: %v\n", err)
 				return
 			}
-			// fmt.Printf("Response body: %s\n", body)
 
 			var apiResponse ApiResponse
 			err = json.Unmarshal(body, &apiResponse)
@@ -121,31 +120,15 @@ func fetchAPIBody(w http.ResponseWriter) {
 
 			fmt.Fprintf(w,"401 and %s %s: Current Speed: %f, Free Flow Speed: %f --> %s\n", exit.Name, exitOrder[i], apiResponse.SpeedInformation.CurrentSpeed, apiResponse.SpeedInformation.FreeFlowSpeed, congestionLevel)
 		}
+		fmt.Fprintf(w,"\n")
 	}
 
 
 }
 
-// func main() {
-// 	ticket := time.NewTicker(5 * time.Second)
-// 	defer ticket.Stop()
-// 	fetchAPIBody()
-
-// 	for t := range ticket.C {
-// 		fmt.Printf("Ticker ticked at %v\n", t)
-// 		fetchAPIBody()
-// 	}
-// }
-
 func handler(w http.ResponseWriter, r *http.Request) {
-		ticket := time.NewTicker(5 * time.Second)
-		defer ticket.Stop()
-		fetchAPIBody(w)
-
-		for t := range ticket.C {
-			fmt.Fprintf(w, "Ticker ticked at %v\n", t)
-			fetchAPIBody(w)
-		}
+	fmt.Fprintf(w,"Retrieving data from %s\n", time.Now().Format(time.RFC1123))
+	fetchAPIBody(w)
 }
 
 func main() {
