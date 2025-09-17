@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"io"
 	"os"
-	"time"
 	"encoding/json"
+	"log"
 )
 
 type Exit struct {
@@ -125,13 +125,27 @@ func fetchAPIBody() {
 
 }
 
-func main() {
-	ticket := time.NewTicker(5 * time.Second)
-	defer ticket.Stop()
-	fetchAPIBody()
+// func main() {
+// 	ticket := time.NewTicker(5 * time.Second)
+// 	defer ticket.Stop()
+// 	fetchAPIBody()
 
-	for t := range ticket.C {
-		fmt.Printf("Ticker ticked at %v\n", t)
-		fetchAPIBody()
+// 	for t := range ticket.C {
+// 		fmt.Printf("Ticker ticked at %v\n", t)
+// 		fetchAPIBody()
+// 	}
+// }
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, Render is working!")
+}
+
+func main() {
+	port := os.Getenv("PORT") // Render sets PORT automatically
+	if port == "" {
+		port = "8080"
 	}
+	http.HandleFunc("/", handler)
+	log.Printf("Server starting on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
